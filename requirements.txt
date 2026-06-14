@@ -1,0 +1,64 @@
+# 活动广场 — 部署说明
+
+## 快速启动（本地测试）
+
+```bash
+# 1. 安装依赖
+pip install -r requirements.txt
+
+# 2. 启动
+python app.py
+```
+
+然后浏览器打开 http://localhost:5000
+
+---
+
+## 部署到服务器
+
+### 方案一：免费托管（推荐新手）
+
+**Render.com（免费）**
+
+1. 把代码上传到 GitHub
+2. 去 https://render.com 注册，新建 Web Service
+3. 连接你的 GitHub 仓库
+4. 填写以下配置：
+   - Build Command: `pip install -r requirements.txt`
+   - Start Command: `gunicorn app:app`
+   - 环境变量：`SECRET_KEY` = 随机字符串（任意输入）
+5. 点击部署，等 2 分钟即可得到公开网址
+
+**Railway.app（免费额度）**
+
+1. 去 https://railway.app 用 GitHub 登录
+2. New Project → Deploy from GitHub repo
+3. 添加环境变量 `SECRET_KEY`
+4. 自动部署完成
+
+---
+
+### 方案二：自己的服务器（VPS/云服务器）
+
+```bash
+# 安装依赖
+pip install -r requirements.txt gunicorn
+
+# 设置环境变量（换成随机字符串）
+export SECRET_KEY="your-random-secret-key-here"
+
+# 用 gunicorn 启动（生产环境）
+gunicorn -w 2 -b 0.0.0.0:5000 app:app
+```
+
+然后用 Nginx 反向代理到 5000 端口（可选，让网站通过 80/443 端口访问）。
+
+---
+
+## 注意事项
+
+- `events.db` 是数据库文件，自动创建，请勿删除
+- `static/uploads/` 存放用户上传的图片
+- 如果用 Render 免费版，服务器重启后 SQLite 数据会丢失（免费版磁盘不持久）
+  - 解决方案：升级付费版，或改用 PostgreSQL（可告诉我，我帮你改代码）
+- `SECRET_KEY` 请设为随机字符串，不要用默认值

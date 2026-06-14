@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}活动广场{% endblock %}
+{% block content %}
+
+<div class="search-row">
+  <form method="get" action="/" style="display:flex;gap:8px;flex:1;">
+    <input class="form-control" type="text" name="q" placeholder="搜索活动、地点…" value="{{ search }}"/>
+    {% if current_cat != '全部' %}<input type="hidden" name="cat" value="{{ current_cat }}"/>{% endif %}
+    <button class="btn" type="submit">搜索</button>
+  </form>
+</div>
+
+<div class="chips">
+  {% for cat in categories %}
+    <a href="/?cat={{ cat }}{% if search %}&q={{ search }}{% endif %}"
+       class="tag {% if cat == current_cat %}tag-active{% endif %}">{{ cat }}</a>
+  {% endfor %}
+</div>
+
+{% if events %}
+  {% for ev in events %}
+  <div class="card" style="margin-bottom:14px;">
+    {% if ev.img %}
+      <a href="/event/{{ ev.id }}">
+        <img src="/static/uploads/{{ ev.img }}" class="event-card-img" alt="{{ ev.title }}"/>
+      </a>
+    {% else %}
+      <div style="height:5px;background:#f0f0ee;"></div>
+    {% endif %}
+    <div class="card-body">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;">
+        <a href="/event/{{ ev.id }}" style="font-size:15px;font-weight:500;line-height:1.4;">{{ ev.title }}</a>
+        <span class="tag">{{ ev.category }}</span>
+      </div>
+      <div style="font-size:13px;color:#888;margin-bottom:3px;">
+        🕐 {{ ev.date }} {{ ev.time }}
+      </div>
+      <div style="font-size:13px;color:#888;margin-bottom:10px;">
+        📍 {{ ev.location }}
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#888;">
+          <span class="avatar" style="width:22px;height:22px;font-size:11px;">{{ ev.host_name[0] }}</span>
+          {{ ev.host_name }} 发起
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          {% if ev.id in user_joined %}
+            <span class="tag tag-active">已报名</span>
+          {% endif %}
+          {% set left = ev.max_attendees - ev.joined_count %}
+          <span style="font-size:13px;color:{% if left < 5 %}#ba7517{% else %}#888{% endif %};">
+            剩 {{ left }} 个名额
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+{% else %}
+  <div style="text-align:center;padding:3rem 0;color:#aaa;">
+    <div style="font-size:40px;margin-bottom:10px;">📭</div>
+    暂无符合条件的活动
+  </div>
+{% endif %}
+
+{% endblock %}

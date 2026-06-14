@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}发布活动 — 活动广场{% endblock %}
+{% block content %}
+
+<h2 style="font-size:18px;font-weight:500;margin-bottom:1.25rem;">发布新活动</h2>
+
+<form method="post" enctype="multipart/form-data">
+  <div class="form-group">
+    <label class="form-label">活动标题 *</label>
+    <input class="form-control" type="text" name="title" placeholder="给活动起个吸引人的标题" required/>
+  </div>
+
+  <div class="grid-2">
+    <div class="form-group">
+      <label class="form-label">日期 *</label>
+      <input class="form-control" type="date" name="date" required/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">时间 *</label>
+      <input class="form-control" type="time" name="time" required/>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">地点名称 *</label>
+    <input class="form-control" type="text" name="location" placeholder="城市 · 具体地点" required/>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">📍 在地图上点击标记位置（可选）</label>
+    <div id="create-map" class="map-box"></div>
+    <p class="map-hint" id="map-hint">点击地图标记活动地点</p>
+    <input type="hidden" name="lat" id="lat-input"/>
+    <input type="hidden" name="lng" id="lng-input"/>
+  </div>
+
+  <div class="grid-2">
+    <div class="form-group">
+      <label class="form-label">分类</label>
+      <select class="form-control" name="category">
+        {% for cat in categories %}
+          <option value="{{ cat }}">{{ cat }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">最多参与人数</label>
+      <input class="form-control" type="number" name="max_attendees" value="20" min="2" max="1000"/>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">🖼 活动封面图（可选，最大 5MB）</label>
+    <div class="img-upload-area" id="upload-area" onclick="document.getElementById('f-img').click()">
+      <span style="font-size:24px;">+</span>
+      <span>点击上传图片</span>
+    </div>
+    <img class="img-preview" id="img-preview" alt="预览"/>
+    <input type="file" name="img" id="f-img" accept="image/*" style="display:none;"/>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">活动介绍 *</label>
+    <textarea class="form-control" name="description" placeholder="介绍活动内容、注意事项等…" required></textarea>
+  </div>
+
+  <div style="display:flex;gap:8px;margin-top:8px;">
+    <a href="/" class="btn" style="flex:1;justify-content:center;">取消</a>
+    <button class="btn btn-primary" type="submit" style="flex:2;justify-content:center;">发布活动</button>
+  </div>
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const map = L.map('create-map', {zoomControl:true, attributionControl:false}).setView([35, 105], 4);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+  let marker = null;
+  map.on('click', function(e) {
+    const {lat, lng} = e.latlng;
+    if (marker) marker.remove();
+    marker = L.marker([lat, lng]).addTo(map);
+    document.getElementById('lat-input').value = lat.toFixed(5);
+    document.getElementById('lng-input').value = lng.toFixed(5);
+    document.getElementById('map-hint').textContent =
+      `已选定：${lat.toFixed(3)}, ${lng.toFixed(3)}`;
+  });
+
+  const imgInput = document.getElementById('f-img');
+  imgInput.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const prev = document.getElementById('img-preview');
+      const area = document.getElementById('upload-area');
+      prev.src = ev.target.result;
+      prev.style.display = 'block';
+      area.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  });
+</script>
+{% endblock %}
